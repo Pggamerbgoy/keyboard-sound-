@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KeySound Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <style>
+        :root {
+            --bg-color: rgba(15, 15, 20, 0.85);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --accent: #00e5ff;
+            --text: #ffffff;
+            --text-dim: #808080;
+            --key-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            background: transparent;
+            color: var(--text);
+            overflow: hidden;
+            -webkit-app-region: drag;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg-color);
+            backdrop-filter: blur(30px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 600;
+            background: linear-gradient(90deg, #00e5ff, #0055ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            -webkit-app-region: no-drag;
+        }
+
+        .btn-icon {
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .btn-icon:hover {
+            opacity: 1;
+        }
+
+        main {
+            flex: 1;
+            padding: 0 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            -webkit-app-region: no-drag;
+            overflow-y: auto;
+        }
+
+        /* Keyboard Styles */
+        .keyboard {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 10px;
+        }
+
+        .key-row {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .key {
+            min-width: 32px;
+            height: 32px;
+            background: var(--key-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+
+        .key:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .key.active {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 15px var(--accent);
+            border-color: transparent;
+        }
+
+        .key.mapped {
+            border-color: rgba(0, 229, 255, 0.5);
+            background: rgba(0, 229, 255, 0.1);
+        }
+
+        /* Custom width for special keys */
+        .key.wide { min-width: 65px; }
+        .key.extra-wide { min-width: 85px; }
+        .key.space { min-width: 200px; }
+
+        /* Mapping List */
+        .mapping-section {
+            flex: 1;
+        }
+
+        .mapping-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            padding-bottom: 20px;
+        }
+
+        .mapping-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .mapping-card .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            color: #ff4b2b;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .key-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 6px;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .sound-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sound-name {
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sound-path {
+            font-size: 10px;
+            color: var(--text-dim);
+        }
+
+        .footer {
+            padding: 15px 25px;
+            background: rgba(0,0,0,0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-dim);
+            -webkit-app-region: no-drag;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">KeySound Pro</div>
+            <div class="controls">
+                <div id="minimizeBtn" class="btn-icon">_</div>
+                <div id="closeBtn" class="btn-icon">×</div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Visual Keyboard Section -->
+            <div class="keyboard" id="keyboardLayout">
+                <!-- Rows will be injected by JS -->
+            </div>
+
+            <!-- Mapping List Section -->
+            <div class="mapping-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="font-size: 14px; color: var(--text-dim); margin: 0;">ACTIVE MAPPINGS</h3>
+                    <div id="clearAllBtn" onclick="clearAllMappings()" style="font-size: 11px; color: #ff4b2b; cursor: pointer; text-decoration: underline;">Clear All</div>
+                </div>
+            <div id="mappingGrid" class="mapping-grid">
+                <!-- Cards -->
+            </div>
+        </main>
+
+        <!-- Editor Modal -->
+        <div id="editorModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 100; align-items: center; justify-content: center;">
+            <div style="background: var(--bg-color); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 30px; width: 400px; display: flex; flex-direction: column; gap: 20px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <h2 id="editorTitle" style="margin: 0; font-size: 18px;">Edit Sound</h2>
+                    <div onclick="closeEditor()" style="cursor: pointer; opacity: 0.6;">×</div>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.03); height: 80px; border-radius: 10px; display: flex; align-items: flex-end; gap: 2px; padding: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                    <!-- Simulated Waveform -->
+                    <div style="flex: 1; height: 30%; background: var(--accent); border-radius: 2px; opacity: 0.3;"></div>
+                    <div style="flex: 1; height: 60%; background: var(--accent); border-radius: 2px; opacity: 0.5;"></div>
+                    <div style="flex: 1; height: 90%; background: var(--accent); border-radius: 2px;"></div>
+                    <div style="flex: 1; height: 40%; background: var(--accent); border-radius: 2px; opacity: 0.4;"></div>
+                    <div style="flex: 1; height: 70%; background: var(--accent); border-radius: 2px; opacity: 0.6;"></div>
+                    <div style="flex: 1; height: 20%; background: var(--accent); border-radius: 2px; opacity: 0.2;"></div>
+                    <div style="flex: 1; height: 50%; background: var(--accent); border-radius: 2px; opacity: 0.4;"></div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <label style="font-size: 12px; color: var(--text-dim);">START TRIM (Seconds)</label>
+                    <input type="range" id="trimStart" min="0" max="2" step="0.01" value="0" style="width: 100%;">
+                    <label style="font-size: 12px; color: var(--text-dim);">END TRIM (Seconds)</label>
+                    <input type="range" id="trimEnd" min="0" max="2" step="0.01" value="2" style="width: 100%;">
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button onclick="testTrim()" style="flex: 1; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; cursor: pointer;">Test</button>
+                    <button onclick="saveTrim()" style="flex: 1; padding: 10px; background: var(--accent); border: none; border-radius: 8px; color: #000; font-weight: 600; cursor: pointer;">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="padding: 15px 25px; border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.2); -webkit-app-region: no-drag;">
+            <div style="font-size: 11px; font-weight: 600; color: var(--text-dim); margin-right: 10px;">PRESETS:</div>
+            <div onclick="applyPreset('blue')" style="font-size: 10px; padding: 6px 12px; background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2); border-radius: 6px; cursor: pointer;">Cherry Blue (Clicky)</div>
+            <div onclick="applyPreset('brown')" style="font-size: 10px; padding: 6px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; cursor: pointer;">Cherry Brown (Tactile)</div>
+            <div onclick="applyPreset('red')" style="font-size: 10px; padding: 6px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; cursor: pointer;">Cherry Red (Linear)</div>
+        </div>
+
+        <div class="footer">
+            <div>Click a key above to select a sound • Press any physical key to test</div>
+            <div id="statusText">Ready</div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
