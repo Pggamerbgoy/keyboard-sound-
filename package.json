@@ -1,7 +1,7 @@
 {
   "name": "keysound-pro",
   "version": "1.0.0",
-  "description": "Premium keyboard audio utility with Anime.js animations",
+  "description": "Premium mechanical keyboard soundboard with built-in trimming and glassmorphism UI.",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
