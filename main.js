@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu, dialog } = require('electron');
 const path = require('path');
 const { uIOhook } = require('uiohook-napi');
 const Store = require('electron-store');
