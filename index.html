@@ -53,13 +53,66 @@
         .controls {
             display: flex;
             gap: 15px;
+            align-items: center;
             -webkit-app-region: no-drag;
         }
+
+        .tool-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .tool-btn:hover { background: rgba(0,229,255,0.2); border-color: var(--accent); }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text-dim);
+            cursor: pointer;
+        }
+
+        .toggle-switch {
+            width: 30px;
+            height: 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            position: relative;
+            transition: 0.3s;
+        }
+        .toggle-switch.on { background: var(--accent); }
+        .toggle-knob {
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: 0.3s;
+        }
+        .toggle-switch.on .toggle-knob { transform: translateX(14px); }
 
         .btn-icon {
             cursor: pointer;
             opacity: 0.6;
             transition: opacity 0.2s;
+            font-size: 18px;
+            margin-left: 10px;
         }
 
         .btn-icon:hover {
@@ -214,6 +267,20 @@
         <header>
             <div class="logo">KeySound Pro</div>
             <div class="controls">
+                
+                <div class="slider-container">
+                    <span>VOL</span>
+                    <input type="range" id="masterVolume" min="0" max="1" step="0.05" value="1" style="width: 60px;">
+                </div>
+
+                <div class="toggle-container" onclick="toggleAppProfiles()">
+                    <span>App Profiles</span>
+                    <div id="profileToggle" class="toggle-switch"><div class="toggle-knob"></div></div>
+                </div>
+
+                <button class="tool-btn" onclick="exportPack()">Export .ksp</button>
+                <button class="tool-btn" onclick="importPack()">Import .ksp</button>
+
                 <div id="minimizeBtn" class="btn-icon">_</div>
                 <div id="closeBtn" class="btn-icon">×</div>
             </div>

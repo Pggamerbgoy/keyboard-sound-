@@ -185,19 +185,52 @@ function saveTrim() {
     closeEditor();
 }
 
+let useProfiles = false;
+let masterVolume = 1.0;
+
+document.getElementById('masterVolume').addEventListener('input', (e) => {
+    masterVolume = parseFloat(e.target.value);
+});
+
+function toggleAppProfiles() {
+    useProfiles = !useProfiles;
+    const toggle = document.getElementById('profileToggle');
+    if (useProfiles) {
+        toggle.classList.add('on');
+        alert('App Profiles Enabled! (KeySound will adapt to your active window)');
+    } else {
+        toggle.classList.remove('on');
+    }
+    ipcRenderer.send('toggle-profiles', useProfiles);
+}
+
+function exportPack() {
+    ipcRenderer.send('export-ksp', mappings);
+}
+
+function importPack() {
+    ipcRenderer.send('import-ksp');
+}
+
 function playSound(key) {
     const mapping = mappings[key];
-    const audio = audioCache[key];
+    let audio = audioCache[key];
     
+    // For overlapping sounds, we could clone the node, but simple playback rate change is good enough for organic feel
     if (audio) {
         const trim = (typeof mapping === 'object' && mapping.trim) ? mapping.trim : { start: 0, end: audio.duration || 10 };
+        
+        // Organic Pitch Randomization (+/- 3%)
+        const pitchShift = 0.97 + (Math.random() * 0.06);
+        audio.playbackRate = pitchShift;
+        audio.volume = masterVolume;
         
         audio.currentTime = trim.start;
         audio.play();
         
         if (trim.end) {
             setTimeout(() => {
-                // Only pause if this is still the same play session (simplified)
+                // Only pause if not re-triggered recently
                 audio.pause();
             }, (trim.end - trim.start) * 1000);
         }

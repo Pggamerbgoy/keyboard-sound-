@@ -82,12 +82,90 @@ ipcMain.on('delete-mapping', (event, key) => {
     delete currentMappings[key];
     store.set('mappings', currentMappings);
 });
+const AdmZip = require('adm-zip');
+const fs = require('fs');
+
 ipcMain.on('clear-all-mappings', () => {
     store.set('mappings', {});
 });
 ipcMain.on('save-mapping-bulk', (event, allMappings) => {
     store.set('mappings', allMappings);
 });
+ipcMain.on('toggle-profiles', (event, state) => {
+    console.log('App Profiles state:', state);
+    // In a real implementation, we would hook into active-win or similar to switch profiles
+});
+
+ipcMain.on('export-ksp', async (event, currentMappings) => {
+    const { canceled, filePath } = await dialog.showSaveDialog({
+        title: 'Export KeySound Pack',
+        filters: [{ name: 'KeySound Pack', extensions: ['ksp'] }]
+    });
+    
+    if (!canceled && filePath) {
+        try {
+            const zip = new AdmZip();
+            const exportConfig = {};
+            
+            // Add files and build relative config
+            for (const [key, mapping] of Object.entries(currentMappings)) {
+                const srcPath = typeof mapping === 'string' ? mapping : mapping.path;
+                if (fs.existsSync(srcPath)) {
+                    const fileName = path.basename(srcPath);
+                    zip.addLocalFile(srcPath, 'sounds');
+                    exportConfig[key] = {
+                        path: `sounds/${fileName}`,
+                        trim: mapping.trim || { start: 0, end: 1 }
+                    };
+                }
+            }
+            
+            zip.addFile('config.json', Buffer.from(JSON.stringify(exportConfig, null, 2), 'utf8'));
+            zip.writeZip(filePath);
+            dialog.showMessageBox({ message: 'Pack exported successfully!', type: 'info' });
+        } catch (err) {
+            dialog.showErrorBox('Export Error', err.message);
+        }
+    }
+});
+
+ipcMain.on('import-ksp', async (event) => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+        title: 'Import KeySound Pack',
+        filters: [{ name: 'KeySound Pack', extensions: ['ksp'] }],
+        properties: ['openFile']
+    });
+    
+    if (!canceled && filePaths.length > 0) {
+        try {
+            const zip = new AdmZip(filePaths[0]);
+            const extractDir = path.join(app.getPath('userData'), 'imported_packs', Date.now().toString());
+            zip.extractAllTo(extractDir, true);
+            
+            const configPath = path.join(extractDir, 'config.json');
+            if (fs.existsSync(configPath)) {
+                const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                const newMappings = {};
+                
+                for (const [key, mapping] of Object.entries(config)) {
+                    newMappings[key] = {
+                        path: path.join(extractDir, mapping.path),
+                        trim: mapping.trim
+                    };
+                }
+                
+                store.set('mappings', newMappings);
+                
+                // Tell the window to reload or we just restart app visually
+                app.relaunch();
+                app.exit();
+            }
+        } catch (err) {
+            dialog.showErrorBox('Import Error', err.message);
+        }
+    }
+});
+
 ipcMain.handle('get-mappings', () => {
     return store.get('mappings', {});
 });
